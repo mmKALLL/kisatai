@@ -1,5 +1,7 @@
-import { Character, Player } from "../types";
-import { generateAttack, createHitbox, gainMeter } from "../utilities";
+import { Character, Player, InGameState } from "../types";
+import { generateAttack, createHitbox, gainMeter, sum } from "../utilities";
+
+const METER_GAIN_MULTIPLIER = 0.055
 
 export const Katshuma: Character = {
     name: 'Katshuma',
@@ -7,13 +9,29 @@ export const Katshuma: Character = {
     maxHealth: 100,
     maxMeter: 100,
     startingMeter: 0,
-    meterThresholds: Array.from(new Array(10), (_, i) => (i + 1) * 10), // [10, 20, ..., 100]
-    walkSpeed: 7,
-    airSpeed: 8,
+    meterThresholds: [25, 50, 75, 100], // [10, 20, ..., 100]
+    walkSpeed: 8.5,
+    airSpeed: 10,
     weight: 1,
     maxJumps: 2,
     jumpStrength: 1,
     hurtboxRadius: 20,
+    onEachFrame:
+        // Return a meter-gain function that keeps state in a closure
+        (() => {
+            let xDiff = 99999999
+            return (player: Player, previousState: InGameState) => {
+
+                // Sum of the x-differences between Katshuma and each other player
+                const otherPlayers = previousState.players.filter(otherPlayer => otherPlayer.playerSlot !== player.playerSlot)
+                const newXDiff = sum(otherPlayers.map(op => Math.abs(op.x - player.x)))
+
+                // If distance increased, gain meter in relation to the change in the sum of x-differences, divided with the number of players
+                const meterGain = Math.max(0, (newXDiff - xDiff) / otherPlayers.length * METER_GAIN_MULTIPLIER)
+                xDiff = newXDiff
+                return gainMeter(meterGain, player)
+            }
+        })(),
     onMove: (player: Player) => player,
     onJump: (player: Player) => player,
     onAttackHit: (player: Player) => player,
@@ -22,7 +40,7 @@ export const Katshuma: Character = {
         LightNeutral: {
             ...generateAttack([
                 { ...createHitbox(4, 12, 5), radius: 123 },
-                { ...createHitbox(12, 20, 10) }
+                { ...createHitbox(12, 20, 10), hitLag: 100 }
             ]),
             endWhenHitboxConnects: false
         },

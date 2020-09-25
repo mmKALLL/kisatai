@@ -1,10 +1,19 @@
-import { AttackStrength, AttackDirection, Hitbox, Attack, ActiveAttack, Player } from './types'
+import { AttackStrength, AttackDirection, Hitbox, Attack, ActiveAttack, Player, PlayerInput, DirectionalInput } from './types'
 
 // General use
 
 // Restrict a number between a min/max
 export const clamp = (number: number, min: number, max: number): number => {
   return Math.min(max, Math.max(min, number))
+}
+
+export const sum = (array: number[]): number => {
+  return array.reduce((a, b) => a + b)
+}
+
+// Explicitly check that all inferred types are used - see e.g. game-loop.ts
+export function assertNever(x: never): never {
+  throw new Error(`Unexpected object in assertNever:\n  ${x}`);
 }
 
 // Music and other assets
@@ -15,10 +24,10 @@ sounds.forEach(snd => snd.volume = 0.22)
 
 const midnightCarnivalUrl = require('./assets/audio/gametal-midnight-carnival.mp3')
 const track = new Audio(midnightCarnivalUrl)
+track.volume = 0.3
+track.loop = true
 
 export const playMusic = (): void => {
-  track.volume = 0.3
-  track.loop = true
   track.play()
 }
 
@@ -47,6 +56,10 @@ export const playerCanAct = (player: Player): boolean => {
 
 export const playerCanMove = (player: Player): boolean => {
   return !playerHasHitlag(player) && (player.state === 'airborne' || player.state === 'groundborne' || player.state === 'attacking')
+}
+
+export const playerCanSDI = (player: Player): boolean => {
+  return player.canSDI && player.hitlagRemaining > 0
 }
 
 export const playerHasHitlag = (player: Player): boolean => {
@@ -85,6 +98,10 @@ export const getAttackString = (player: Player, attack: AttackStrength, directio
 
 export const isAttackRelativeToPlayer = (attack: Attack): boolean => {
   return attack.movesWithPlayer && !attack.createUsingWorldCoordinates
+}
+
+export const isDirectionalInput = (input: PlayerInput): input is DirectionalInput => {
+  return input === PlayerInput.Left || input === PlayerInput.Right || input === PlayerInput.Up || input === PlayerInput.Down
 }
 
 // Attack generation in character files

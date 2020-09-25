@@ -1,5 +1,5 @@
-import { ActiveAttack, Player, InGameState, Hitbox, CharacterState, NeutralCharacterState } from "../types";
-import { playHitSound, isHitboxActive, hasHitboxEnded, hasAttackEnded, playerCanAct, playerHasHitlag, playerCanMove } from "../utilities";
+import { ActiveAttack, Player, InGameState, Hitbox, CharacterState, NeutralCharacterState, PlayerInput, DirectionalInput } from "../types";
+import { playHitSound, isHitboxActive, hasHitboxEnded, hasAttackEnded, playerCanAct, playerHasHitlag, playerCanMove, playerCanSDI, clamp } from "../utilities";
 
 // Called each frame
 export const nextPhysicsState = (state: InGameState): InGameState => {
@@ -10,6 +10,7 @@ const updatePlayers = (state: InGameState): InGameState => {
   let nextPlayers: Player[] = state.players.slice()
 
   // movement, physics, landing, state updates
+  nextPlayers = handleOnFrameEvents(nextPlayers, state)
   nextPlayers = handleCollisions(nextPlayers, state)
   nextPlayers = handlePhysics(nextPlayers)
   nextPlayers = handleStateUpdates(nextPlayers)
@@ -18,6 +19,14 @@ const updatePlayers = (state: InGameState): InGameState => {
     ...state,
     players: nextPlayers
   }
+}
+
+const handleOnFrameEvents = (players: Player[], state: InGameState): Player[] => {
+  return players.map(player =>
+    player.character.onEachFrame ?
+    player.character.onEachFrame(player, state) :
+    player
+  )
 }
 
 // Check for collisions with hitboxes
@@ -37,7 +46,7 @@ const handleCollisions = (players: Player[], state: InGameState): Player[] => {
     state.activeAttacks.forEach((attack: ActiveAttack) => {
       if (attack.playerSlot !== player.playerSlot) {
         attack.hitboxes.forEach((hitbox: Hitbox) => {
-          if (isHitboxActive(hitbox)) {
+          if (!hasAttackEnded(attack) && isHitboxActive(hitbox)) {
             // TODO: Handle hitboxes that don't move with character
             // Calculate hit if hitbox overlaps with hurtbox
             // If multiple hitboxes hit on the same frame, the player gets hit with the last one of them
@@ -68,6 +77,7 @@ const handleCollisions = (players: Player[], state: InGameState): Player[] => {
       health: hit ? player.health - damage : player.health,
       xSpeed: hit ? xKnockback : player.xSpeed,
       ySpeed: hit ? yKnockback : player.ySpeed,
+      canSDI: hit ? true : player.canSDI,
       hitlagRemaining: hitlagRemaining,
       framesUntilNeutral: hit ? stunDuration : player.framesUntilNeutral,
       state: hit ? 'hitstun' : player.state
@@ -115,7 +125,7 @@ const handlePhysics = (players: Player[]): Player[] => {
       nextPlayer.jumps = player.y < 600 && nextPlayer.y >= 600 ? player.character.maxJumps : player.jumps // Refresh jumps if landed
 
       // Landing lag could be: if (player.y < 600 && nextPlayer.y >= 600) nextPlayer.hitlagRemaining += 2
-      // TODO: Add hitlag on floor/groundbounce
+      // TODO: Add hitlag on floor/groundbounce, remember to remove canSDI flag
     }
 
     return nextPlayer
@@ -130,7 +140,7 @@ export const handlePlayerMove = (player: Player, direction: -1 | 1, previousStat
   let nextPlayer = { ...player }
   if (playerCanMove(player)) {
     nextPlayer.facing = player.state === 'groundborne' ? (direction === -1 ? 'left' : 'right') : player.facing,
-    nextPlayer.xSpeed = direction * (player.state === 'airborne' ? player.character.airSpeed : player.character.walkSpeed)
+    nextPlayer.xSpeed = direction * (player.state === 'airborne' ? player.character.airSpeed : player.character.walkSpeed) // TODO: handle state === 'attacking'
 
     if (player.character.onMove) {
       nextPlayer = player.character.onMove(nextPlayer, previousState)
@@ -160,6 +170,31 @@ export const handlePlayerFastFall = (player: Player): Player => {
   return player
 }
 
+export const handlePlayerSDI = (player: Player, input: DirectionalInput): Player => {
+  if (playerCanSDI(player)) {
+    console.log('handling SDI for input', input)
+    let dx = 0, dy = 0
+    switch (input) {
+      case PlayerInput.Left: dx = -15; break
+      case PlayerInput.Right: dx = 15; break
+      case PlayerInput.Up: dy = -15;   break
+      case PlayerInput.Down: dy = 15;  break
+    }
+    console.log(dx, dy, {
+      x: clamp(player.x + dx,
+        player.character.hurtboxRadius,
+        1200 - player.character.hurtboxRadius),
+      y: Math.min(600, player.y + dy)})
+    return {
+      ...player,
+      x: clamp(player.x + dx,
+        player.character.hurtboxRadius,
+        1200 - player.character.hurtboxRadius),
+      y: Math.min(600, player.y + dy)
+    }
+  }
+  return player
+}
 
 // Attack handling
 
@@ -243,6 +278,9 @@ const handlePlayerState = (player: Player): Player => {
       : Math.max(0, player.framesUntilNeutral - 1)
   nextPlayer.hitlagRemaining = Math.max(0, nextPlayer.hitlagRemaining - 1)
   nextPlayer.state = playerState(nextPlayer)
+  if (!playerCanSDI(nextPlayer)) {
+    nextPlayer.canSDI = false // remove canSDI flag if hitlag remaining is < 0
+  }
   return nextPlayer
 }
 

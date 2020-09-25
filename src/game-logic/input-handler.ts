@@ -1,78 +1,64 @@
-import { Player, KeyStatus, InputStatus, InGameState, ActiveAttack, AttackStrength, AttackDirection, CharacterState, Attack } from "../types";
-import { playerCanMove, playerCanAct, getAttackString } from "../utilities";
-import { handlePlayerMove, handlePlayerJump, handlePlayerFastFall } from "./physics";
+import * as kiltagear from "../kiltagear";
+import { Player, KeyStatus, InputStatus, InGameState, CharacterSelectionState, ActiveAttack, AttackStrength, AttackDirection, CharacterState, Attack, PlayerInput } from "../types";
+import { getAttackString, playerCanAct, playerCanSDI, isDirectionalInput } from "../utilities";
+import { handlePlayerMove, handlePlayerJump, handlePlayerFastFall, handlePlayerSDI } from "./physics";
 
-export enum PlayerInput {
-  Left,
-  Right,
-  Up,
-  Down,
-  Neutral,
-  Light,
-  Special,
-  Meter
-}
-
-export type PlayerAction = { playerPort: number, action: PlayerInput }
-
-function keyHeld(inputs: InputStatus, key: string) {
-  return inputs && inputs[key] && inputs[key].isDown
+function inputHeld(player: Player, inputs: InputStatus, inputToCheck: PlayerInput) {
+  return player.playerInputs[inputToCheck].some(keyName => inputs[keyName] && inputs[keyName].isDown)
 }
 
 export const handlePlayerInputs = (currentState: InGameState, inputs: InputStatus, keysPressed: KeyStatus[], keysReleased: KeyStatus[]): InGameState => {
   const nextState: InGameState = { ...currentState }
-  const players: Player[] = nextState.players
+  const nextPlayers: Player[] = nextState.players.slice() // shallow copy
 
-  // Player 1 horizontal movement
-  if (keyHeld(inputs, 'a') && playerCanMove(players[0]) && !keyHeld(inputs, 'd')) {
-    players[0] = handlePlayerMove(players[0], -1, currentState)
-  }
-  if (keyHeld(inputs, 'd') && playerCanMove(players[0]) && !keyHeld(inputs, 'a')) {
-    players[0] = handlePlayerMove(players[0], 1, currentState)
-  }
+  nextPlayers.forEach((player) => {
+    const inputMap: { [key: string]: PlayerInput } = kiltagear.inputMaps[player.playerSlot]
 
-  // Player 2 horizontal movement
-  if (keyHeld(inputs, 'ArrowLeft') && playerCanMove(players[1]) && !keyHeld(inputs, 'ArrowRight')) {
-    players[1] = handlePlayerMove(players[1], -1, currentState)
-  }
-  if (keyHeld(inputs, 'ArrowRight') && playerCanMove(players[1]) && !keyHeld(inputs, 'ArrowLeft')) {
-    players[1] = handlePlayerMove(players[1], 1, currentState)
-  }
+    // Check held inputs (i.e. horizontal movement)
+    if (inputHeld(player, inputs, PlayerInput.Right) && !inputHeld(player, inputs, PlayerInput.Left)) {
+      player = handlePlayerMove(player, 1, currentState)
+    }
+    if (inputHeld(player, inputs, PlayerInput.Left) && !inputHeld(player, inputs, PlayerInput.Right)) {
+      player = handlePlayerMove(player, -1, currentState)
+    }
 
-  players.forEach((player) => {
+    // Check keypresses
     keysPressed.forEach((key: KeyStatus) => {
-        const input = player.playerInputs[key.keyName]
+      const input = inputMap[key.keyName]
 
-        if (input) {
-          switch (input) {
-            case PlayerInput.Up:
-              players[player.playerSlot] = handlePlayerJump(player, currentState)
-              break
+      if (playerCanSDI(player) && isDirectionalInput(input)) {
+        player = handlePlayerSDI(player, input)
+      } else {
+        switch (input) {
+          case PlayerInput.Up:
+            player = handlePlayerJump(player, nextState)
+            break
 
-            case PlayerInput.Down:
-              players[player.playerSlot] = handlePlayerFastFall(player)
-              break
+          case PlayerInput.Down:
+            player = handlePlayerFastFall(player)
+            break
 
-            case PlayerInput.Light:
-              nextState.activeAttacks = handleAttack('Light', player, inputs, nextState.activeAttacks)
-              break
+          case PlayerInput.Light:
+            nextState.activeAttacks = handleAttack('Light', player, inputs, nextState.activeAttacks)
+            break
 
-            case PlayerInput.Special:
-              nextState.activeAttacks = handleAttack('Special', player, inputs, nextState.activeAttacks)
-              break
+          case PlayerInput.Special:
+            nextState.activeAttacks = handleAttack('Special', player, inputs, nextState.activeAttacks)
+            break
 
-            case PlayerInput.Meter:
-              nextState.activeAttacks = handleAttack('Meter', player, inputs, nextState.activeAttacks)
-              break
+          case PlayerInput.Meter:
+            nextState.activeAttacks = handleAttack('Meter', player, inputs, nextState.activeAttacks)
+            break
 
-            default:
-
-          }
+          default:
         }
-      })
+      }
+    })
+
+    nextPlayers[player.playerSlot] = player
   })
 
-  return { ...nextState, players: players }
+  return { ...nextState, players: nextPlayers }
 }
 
 // Mutate passed player and state to add a new attack based on the input
@@ -98,7 +84,7 @@ function getCharacterAttack(attackStrength: AttackStrength, player: Player, atta
 
     if (attack) {
       return {
-        ...attack,
+        ...attack, // Shallow copy to avoid modifying the base attack when changing activeAttack
       }
     }
   }
@@ -107,10 +93,10 @@ function getCharacterAttack(attackStrength: AttackStrength, player: Player, atta
 }
 
 function getAttackDirection(player: Player, inputs: InputStatus): AttackDirection {
-  const isHoldingLeft =  (player.playerSlot === 0 && keyHeld(inputs, 'a')) || (player.playerSlot === 1 && keyHeld(inputs, 'ArrowLeft'))
-  const isHoldingRight = (player.playerSlot === 0 && keyHeld(inputs, 'd')) || (player.playerSlot === 1 && keyHeld(inputs, 'ArrowRight'))
-  const isHoldingDown =  (player.playerSlot === 0 && keyHeld(inputs, 's')) || (player.playerSlot === 1 && keyHeld(inputs, 'ArrowDown'))
-  const isHoldingUp =    (player.playerSlot === 0 && keyHeld(inputs, 'w')) || (player.playerSlot === 1 && keyHeld(inputs, 'ArrowUp'))
+  const isHoldingLeft =  (inputHeld(player, inputs, PlayerInput.Left))
+  const isHoldingRight = (inputHeld(player, inputs, PlayerInput.Right))
+  const isHoldingDown =  (inputHeld(player, inputs, PlayerInput.Down))
+  const isHoldingUp =    (inputHeld(player, inputs, PlayerInput.Up))
   const playerDirection = isHoldingLeft ? PlayerInput.Left :
                           (isHoldingRight ? PlayerInput.Right :
                           (isHoldingDown ? PlayerInput.Down :
@@ -123,8 +109,9 @@ function getAttackDirection(player: Player, inputs: InputStatus): AttackDirectio
 
 function inputToAttackDirection(input: PlayerInput, facing: 'left' | 'right', state: CharacterState): AttackDirection {
   switch (input) {
-    case PlayerInput.Left: return state === 'groundborne' ? 'Forward' : /*airborne*/ (facing === 'left' ? 'Forward' : 'Back')
-    case PlayerInput.Right: return state === 'groundborne' ? 'Forward' : /*airborne*/ (facing === 'right' ? 'Forward' : 'Back')
+    // Keep facing while airborne, eliminate illegal directions based on state
+    case PlayerInput.Left: return state === 'groundborne' ? 'Forward' : (facing === 'left' ? 'Forward' : 'Back')
+    case PlayerInput.Right: return state === 'groundborne' ? 'Forward' : (facing === 'right' ? 'Forward' : 'Back')
     case PlayerInput.Down: return 'Down'
     case PlayerInput.Up: return state === 'airborne' ? 'Up' : 'Neutral'
     case PlayerInput.Neutral: return 'Neutral'
@@ -168,4 +155,70 @@ function addActiveAttack(attack: Attack, activeAttacks: ActiveAttack[], player: 
   }
 
   return activeAttacks.concat(newActiveAttack)
+}
+
+export const handleCharacterSelection = (currentState: CharacterSelectionState, keysPressed: KeyStatus[]): CharacterSelectionState => {
+  const nextState: CharacterSelectionState = currentState
+  const lastCharacterIndex: number = kiltagear.characters.length - 1
+
+  keysPressed.forEach((key: KeyStatus) => {
+    switch (key.keyName) {
+      case 'w':
+        if (!currentState.playerReady[0] && currentState.characterSelection[0] > 0)
+          nextState.characterSelection[0]--
+        break
+      case 'a':
+        if (!currentState.playerReady[0] && currentState.characterSelection[0] > 0)
+          nextState.characterSelection[0]--
+        break
+      case 's':
+        if (!currentState.playerReady[0] && currentState.characterSelection[0] < lastCharacterIndex)
+          nextState.characterSelection[0]++
+        break
+      case 'd':
+        if (!currentState.playerReady[0] && currentState.characterSelection[0] < lastCharacterIndex)
+          nextState.characterSelection[0]++
+        break
+      case 'c':
+        if (!currentState.playerReady[0]) {
+          nextState.playerReady[0] = true
+        } else if (currentState.playerReady[0] && currentState.playerReady[1]) {
+          nextState.start = true
+        }
+        break
+      case 'v':
+        if (!nextState.start)
+          nextState.playerReady[0] = false
+        break
+      case 'ArrowUp':
+        if (!currentState.playerReady[1] && currentState.characterSelection[1] > 0)
+          nextState.characterSelection[1]--
+        break
+      case 'ArrowLeft':
+        if (!currentState.playerReady[1] && currentState.characterSelection[1] > 0)
+          nextState.characterSelection[1]--
+        break
+      case 'ArrowDown':
+        if (!currentState.playerReady[1] && currentState.characterSelection[1] < lastCharacterIndex)
+          nextState.characterSelection[1]++
+        break
+      case 'ArrowRight':
+        if (!currentState.playerReady[1] && currentState.characterSelection[1] < lastCharacterIndex)
+          nextState.characterSelection[1]++
+        break
+      case ',':
+        if (!currentState.playerReady[1]) {
+          nextState.playerReady[1] = true
+        } else if (currentState.playerReady[0] && currentState.playerReady[1]) {
+          nextState.start = true
+        }
+        break
+      case '.':
+        if (!nextState.start)
+          nextState.playerReady[1] = false
+        break
+    }
+  })
+
+  return nextState
 }

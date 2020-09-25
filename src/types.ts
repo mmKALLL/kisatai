@@ -1,5 +1,3 @@
-import { PlayerInput } from "./game-logic/input-handler";
-
 // Game state handling related typings
 
 export type GameState = (TitleScreenState | CharacterSelectionState | InGameState | GameOverState)
@@ -12,23 +10,24 @@ export type TitleScreenState = {
 export type CharacterSelectionState = {
   screen: 'character-select'
   musicPlaying: boolean
-  characterSelection: {
-    x: number,
-    y: number
-  }[]
+  characterSelection: number[]
+  playerReady: boolean[]
+  start: boolean
 }
 
 export type InGameState = {
   screen: 'in-game'
   musicPlaying: boolean
-  players: Player[],
-  activeAttacks: ActiveAttack[],
+  stage: Stage
+  players: Player[]
+  characterSelection: number[]
+  activeAttacks: ActiveAttack[]
 }
 
 export type GameOverState = {
   screen: 'game-over'
   musicPlaying: boolean
-  winner: number | undefined
+  winner: Player | undefined
   framesUntilTitle: number
 }
 
@@ -38,6 +37,22 @@ export type KeyStatus = {
   keyName: string
   isDown: boolean
   lastPressed: number
+}
+
+// Menu/stage related typings
+
+export type Stage = {
+  name: string
+  image: string // File name for the in-game background
+  thumbnail?: string // File name, shown on "stage selection" if we eventually have one
+  width: number
+  height: number // Camera stops scrolling beyond this if characters go off the top, but technically there's no ceiling yet
+}
+
+export type Options = {
+  soundVolume: number // Value between 0..1
+  musicVolume: number // Value between 0..1
+  // Key config is stored directly in kiltagear.players
 }
 
 // Character status related typings
@@ -69,6 +84,7 @@ export type Character = {
   maxJumps: number,
   jumpStrength: number,
   hurtboxRadius: number,
+  onEachFrame?: (player: Player, previousState: InGameState) => Player,
   onMove?: (player: Player, previousState: InGameState) => Player,
   onJump?: (player: Player, previousState: InGameState) => Player,
   onAttackHit?: (player: Player, previousState: InGameState) => Player, // Called when own attack hits an opponent
@@ -123,11 +139,11 @@ type RelativeToPlayer = {
 }
 
 export type Attack = CoordinateSettings & {
-  x: number, // Check if it's relative to player or in world coordinates using utilities.isAttackRelativeToPlayer
+  x: number, // Check if the coordinate is relative to player or in world coordinates using utilities.isAttackRelativeToPlayer
   y: number,
   xSpeed: number,
   ySpeed: number,
-  duration: number, // How long to prevent player from moving, in frames
+  duration: number, // How long to prevent player from doing another attack, in frames
   meterCost: number,
   hitboxes: Hitbox[],
   endWhenHitboxConnects: boolean,
@@ -170,13 +186,14 @@ export type PlayerBase = {
   state: CharacterState,
   xSpeed: number,
   ySpeed: number,
+  canSDI: boolean,
   hitlagRemaining: number,
   framesUntilNeutral: number,
 }
 
 export type Player = PlayerBase & {
   playerSlot: number
-  playerInputs: { [key: string]: PlayerInput }
+  playerInputs: { [input in Exclude<PlayerInput, PlayerInput.Neutral>]: string[] } // For each pressable PlayerInput, provide an array of keyNames
   character: Character,
   x: number,
   y: number,
@@ -185,3 +202,16 @@ export type Player = PlayerBase & {
   meter: number,
   jumps: number,
 }
+
+export enum PlayerInput {
+  Left = 'Left',
+  Right = 'Right',
+  Up = 'Up',
+  Down = 'Down',
+  Neutral = 'Neutral',
+  Light = 'Light',
+  Special = 'Special',
+  Meter = 'Meter'
+}
+
+export type DirectionalInput = PlayerInput.Left | PlayerInput.Right | PlayerInput.Up | PlayerInput.Down
