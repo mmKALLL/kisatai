@@ -1,9 +1,9 @@
 import * as kiltagear from '../kiltagear'
-import { render } from '../render'
+import { render, allowTransitionToIngame } from '../render'
 import { InputStatus, KeyStatus, GameState, InGameState, Hitbox, Player, GameOverState } from '../types';
-import { handlePlayerInputs } from './input-handler';
+import { handleCharacterSelection, handlePlayerInputs } from './input-handler';
 import { updateAttacks, nextPhysicsState } from './physics';
-import { playMusic } from '../utilities';
+import { playMusic, toggleMusicMuted, assertNever } from '../utilities';
 
 // As a developer, I want this file to be indented with 2 spaces. -- Esa
 
@@ -23,14 +23,19 @@ export const startGameLoop = () => {
 
 // Functional loop: return next state from current state and inputs
 const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
+  let state = { ...currentState }
 
   const keysPressed: KeyStatus[] = kiltagear.keysPressed.map((key: string) => kiltagear.keys[key])
   const keysReleased: KeyStatus[] = kiltagear.keysReleased.map((key: string) => kiltagear.keys[key])
   kiltagear.clearKeyArrays()
 
-  switch (currentState.screen) {
+  // Global mute/unmute music
+  if (keysPressed.find(input => input.keyName === 'm')) {
+    toggleMusicMuted()
+  }
+
+  switch (state.screen) {
     case 'in-game':
-      let state = currentState
       state = handlePlayerInputs(state, inputs, keysPressed, keysReleased)
       state = updateAttacks(state)
       state = nextPhysicsState(state)
@@ -40,73 +45,96 @@ const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
       }
 
       return state
-      break
     case 'character-select':
-      // Change to in-game when any key is pressed
-      if (keysPressed.length > 0) {
+      state = handleCharacterSelection(state, keysPressed)
+
+      if (state.start && allowTransitionToIngame()) {
+        kiltagear.initializePlayers(
+          state.characterSelection.map(selection => kiltagear.characters[selection])
+        )
+
         return {
           screen: 'in-game',
+          stage: kiltagear.stages.kiltis6,
+          musicPlaying: true,
           players: kiltagear.players,
-          activeAttacks: [],
-          musicPlaying: true
+          characterSelection: state.characterSelection,
+          activeAttacks: []
         }
       }
-      break
+
+      return state
     case 'title-screen':
+      // Shortcut for jumping straight in-game with music muted
+      if (keysPressed.some(key => key.keyName === '0')) {
+        kiltagear.initializeInputMaps()
+        kiltagear.initializePlayers([kiltagear.characters[0], kiltagear.characters[1]])
+        return {
+          screen: 'in-game',
+          stage: kiltagear.stages.kiltis6,
+          musicPlaying: true,
+          players: kiltagear.players,
+          characterSelection: [0, 1],
+          activeAttacks: []
+        }
+      }
+
       // Change to character select when any key is pressed
       if (keysPressed.length > 0) {
-        if (currentState.musicPlaying === false) {
-          currentState.musicPlaying = true
+        if (state.musicPlaying === false) {
+          state.musicPlaying = true
           playMusic()
         }
+        kiltagear.initializeInputMaps()
         return {
           screen: 'character-select',
-          characterSelection: [
-            { x: 1, y: 1 },
-            { x: 1, y: 1}
-          ],
-          musicPlaying: true
+          musicPlaying: true,
+          characterSelection: [0, 1], // Initial cursor positions of player 1 and 2, needs to be expanded to support more players
+          playerReady: [false, false],
+          start: false
         }
       }
+
       break
     case 'game-over':
-      if (currentState.framesUntilTitle <= 0) {
+      if (state.framesUntilTitle <= 0) {
         return {
           screen: 'title-screen',
           musicPlaying: true
         }
       }
+
       return {
-        ...currentState,
-        framesUntilTitle: currentState.framesUntilTitle - 1
+        ...state,
+        framesUntilTitle: state.framesUntilTitle - 1
       }
     default:
-      throw new Error(`unknown game state when pressing key\n  state: ${currentState}\n  key event: ${event}`)
+      assertNever(state)
   }
-  return currentState
+
+  return state
 }
 
 const isGameOver = (state: InGameState): boolean => {
   return state.players.find((player: Player) => player.health <= 0) !== undefined
 }
 
-// TODO: Add screen 'game-over'
+// TODO: Add a results screen
 const gameOverState = (players: Player[]): GameOverState => {
   const winner: Player | undefined = players.find(player => player.health > 0)
   if (winner) {
-    const winnerSlot: number = winner.playerSlot
     return {
       screen: 'game-over',
       musicPlaying: true,
-      winner: winnerSlot,
+      winner: winner,
       framesUntilTitle: 180
     }
-  }
-  return {
-    screen: 'game-over',
-    musicPlaying: true,
-    winner: undefined,
-    framesUntilTitle: 140
+  } else {
+    return {
+      screen: 'game-over',
+      musicPlaying: true,
+      winner: undefined,
+      framesUntilTitle: 140
+    }
   }
 }
-
