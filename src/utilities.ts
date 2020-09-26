@@ -1,4 +1,13 @@
-import { AttackStrength, AttackDirection, Hitbox, Attack, ActiveAttack, Player, PlayerInput, DirectionalInput } from './types'
+import {
+  AttackStrength,
+  AttackDirection,
+  Hitbox,
+  Attack,
+  ActiveAttack,
+  Player,
+  PlayerInput,
+  DirectionalInput,
+} from './types'
 
 // General use
 
@@ -13,14 +22,14 @@ export const sum = (array: number[]): number => {
 
 // Explicitly check that all inferred types are used - see e.g. game-loop.ts
 export function assertNever(x: never): never {
-  throw new Error(`Unexpected object in assertNever:\n  ${x}`);
+  throw new Error(`Unexpected object in assertNever:\n  ${x}`)
 }
 
 // Music and other assets
 
 const damageslashUrl = require('./assets/audio/damageslash.wav')
 const sounds = [new Audio(damageslashUrl)]
-sounds.forEach(snd => snd.volume = 0.22)
+sounds.forEach((snd) => (snd.volume = 0.22))
 
 const midnightCarnivalUrl = require('./assets/audio/gametal-midnight-carnival.mp3')
 const track = new Audio(midnightCarnivalUrl)
@@ -40,8 +49,8 @@ export const setMusicVolume = (volume: number): void => {
 }
 
 export const toggleMusicMuted = (): void => {
-    const newVolume = getMusicVolume() !== 0 ? 0 : 0.3
-    setMusicVolume(newVolume)
+  const newVolume = getMusicVolume() !== 0 ? 0 : 0.3
+  setMusicVolume(newVolume)
 }
 
 export const playHitSound = (): void => {
@@ -51,11 +60,18 @@ export const playHitSound = (): void => {
 // State handling and checks
 
 export const playerCanAct = (player: Player): boolean => {
-  return !playerHasHitlag(player) && player.framesUntilNeutral <= 0 && (player.state === 'airborne' || player.state === 'groundborne')
+  return (
+    !playerHasHitlag(player) &&
+    player.framesUntilNeutral <= 0 &&
+    (player.state === 'airborne' || player.state === 'groundborne')
+  )
 }
 
 export const playerCanMove = (player: Player): boolean => {
-  return !playerHasHitlag(player) && (player.state === 'airborne' || player.state === 'groundborne' || player.state === 'attacking')
+  return (
+    !playerHasHitlag(player) &&
+    (player.state === 'airborne' || player.state === 'groundborne' || player.state === 'attacking')
+  )
 }
 
 export const playerCanSDI = (player: Player): boolean => {
@@ -71,8 +87,11 @@ export const gainMeter = (amount: number, player: Player): Player => {
 }
 
 export const isHitboxActive = (hitbox: Hitbox): boolean => {
-  return !hitbox.hasHit && hitbox.framesUntilActivation <= 0 &&
-    hitbox.framesUntilActivation + hitbox.duration > 0 // framesUntilActivation is decreased even after active
+  return (
+    !hitbox.hasHit &&
+    hitbox.framesUntilActivation <= 0 &&
+    hitbox.framesUntilActivation + hitbox.duration > 0
+  ) // framesUntilActivation is decreased even after active
 }
 
 export const hasHitboxEnded = (hitbox: Hitbox): boolean => {
@@ -85,15 +104,23 @@ export const hasAttackHit = (attack: ActiveAttack): boolean => {
 }
 
 export const hasAttackEnded = (attack: ActiveAttack): boolean => {
-  return attack.endWhenHitboxConnects && hasAttackHit(attack)
-      || attack.endWhenHitboxesEnded && attack.hitboxes.length === 0
-      || attack.endAfterDurationEnded && attack.currentFrame >= attack.duration
+  return (
+    (attack.endWhenHitboxConnects && hasAttackHit(attack)) ||
+    (attack.endWhenHitboxesEnded && attack.hitboxes.length === 0) ||
+    (attack.endAfterDurationEnded && attack.currentFrame >= attack.duration)
+  )
 }
 
 // Helpers for using attack data easily
 
-export const getAttackString = (player: Player, attack: AttackStrength, direction: AttackDirection): string => {
-  return playerCanAct(player) ? `${player.state === 'airborne' ? 'air' : ''}${attack}${direction}` : ''
+export const getAttackString = (
+  player: Player,
+  attack: AttackStrength,
+  direction: AttackDirection
+): string => {
+  return playerCanAct(player)
+    ? `${player.state === 'airborne' ? 'air' : ''}${attack}${direction}`
+    : ''
 }
 
 export const isAttackRelativeToPlayer = (attack: Attack): boolean => {
@@ -101,12 +128,21 @@ export const isAttackRelativeToPlayer = (attack: Attack): boolean => {
 }
 
 export const isDirectionalInput = (input: PlayerInput): input is DirectionalInput => {
-  return input === PlayerInput.Left || input === PlayerInput.Right || input === PlayerInput.Up || input === PlayerInput.Down
+  return (
+    input === PlayerInput.Left ||
+    input === PlayerInput.Right ||
+    input === PlayerInput.Up ||
+    input === PlayerInput.Down
+  )
 }
 
 // Attack generation in character files
 
-export const createHitbox = (startFrame: number, duration: number, strength: number = 6): Hitbox => {
+export const createHitbox = (
+  startFrame: number,
+  duration: number,
+  strength: number = 6
+): Hitbox => {
   return {
     damage: strength * 0.75,
     radius: 10 + strength * 4,
@@ -123,13 +159,17 @@ export const createHitbox = (startFrame: number, duration: number, strength: num
     y: 0,
     framesUntilActivation: startFrame,
     duration: duration,
-    onActivation: (state) => { return state },
-    onHit: (state) => { return state },
-    onEnd: (state) => { return state }
+    onActivation: (state) => state,
+    onHit: (state) => state,
+    onEnd: (state) => state,
   }
 }
 
-export const createRandomHitbox = (variance: number = 15, baseStrength: number = Math.random() * 15, damage: number = Math.random() * variance): Hitbox => {
+export const createRandomHitbox = (
+  variance: number = 15,
+  baseStrength: number = Math.random() * 15,
+  damage: number = Math.random() * variance
+): Hitbox => {
   const r = (value) => Math.random() * value
   return {
     damage: damage,
@@ -147,31 +187,31 @@ export const createRandomHitbox = (variance: number = 15, baseStrength: number =
     y: 0 + 8 * r(variance) - 8 * r(variance),
     framesUntilActivation: variance * 1.4,
     duration: baseStrength + variance * 2.5,
-    onActivation: (state) => { return state },
-    onHit: (state) => { return state },
-    onEnd: (state) => { return state }
+    onActivation: (state) => state,
+    onHit: (state) => state,
+    onEnd: (state) => state,
   }
 }
 
 export const generateAttack = (hitboxes: Hitbox[]): Attack => {
   return {
-      x: 0,
-      y: 0,
-      xSpeed: 0,
-      ySpeed: 0,
+    x: 0,
+    y: 0,
+    xSpeed: 0,
+    ySpeed: 0,
 
-      // Only one or neither of these should be true, setting both to true is undefined behavior.
-      createUsingWorldCoordinates: false, // Ignore player position when creating the hitbox
-      movesWithPlayer: true, // Attack location is recalculated as the player moves
+    // Only one or neither of these should be true, setting both to true is undefined behavior.
+    createUsingWorldCoordinates: false, // Ignore player position when creating the hitbox
+    movesWithPlayer: true, // Attack location is recalculated as the player moves
 
-      hitboxes: hitboxes,
-      duration: 35,
-      meterCost: 0,
-      endWhenHitboxConnects: false,
-      endWhenHitboxesEnded: true,
-      endAfterDurationEnded: false,
-      onStart: (state, attack) => { return state },
-      onEnd: (state, attack) => { return state }
+    hitboxes: hitboxes,
+    duration: 35,
+    meterCost: 0,
+    endWhenHitboxConnects: false,
+    endWhenHitboxesEnded: true,
+    endAfterDurationEnded: false,
+    onStart: (state, attack) => state,
+    onEnd: (state, attack) => state,
   }
 }
 
@@ -181,6 +221,6 @@ export const generateProjectile = (hitboxes: Hitbox[]): Attack => {
     movesWithPlayer: false,
     endWhenHitboxConnects: true,
     xSpeed: 2.5,
-    hitboxes: hitboxes.map(hitbox => ({ ...hitbox, ignoreOwnerHitlag: true })),
+    hitboxes: hitboxes.map((hitbox) => ({ ...hitbox, ignoreOwnerHitlag: true })),
   }
 }
