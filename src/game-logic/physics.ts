@@ -1,5 +1,24 @@
-import { ActiveAttack, Player, InGameState, Hitbox, CharacterState, NeutralCharacterState, PlayerInput, DirectionalInput } from "../types";
-import { playHitSound, isHitboxActive, hasHitboxEnded, hasAttackEnded, playerCanAct, playerHasHitlag, playerCanMove, playerCanSDI, clamp } from "../utilities";
+import {
+  ActiveAttack,
+  Player,
+  InGameState,
+  Hitbox,
+  CharacterState,
+  NeutralCharacterState,
+  PlayerInput,
+  DirectionalInput,
+} from '../types'
+import {
+  playHitSound,
+  isHitboxActive,
+  hasHitboxEnded,
+  hasAttackEnded,
+  playerCanAct,
+  playerHasHitlag,
+  playerCanMove,
+  playerCanSDI,
+  clamp,
+} from '../utilities'
 
 // Called each frame
 export const nextPhysicsState = (state: InGameState): InGameState => {
@@ -17,15 +36,13 @@ const updatePlayers = (state: InGameState): InGameState => {
 
   return {
     ...state,
-    players: nextPlayers
+    players: nextPlayers,
   }
 }
 
 const handleOnFrameEvents = (players: Player[], state: InGameState): Player[] => {
-  return players.map(player =>
-    player.character.onEachFrame ?
-    player.character.onEachFrame(player, state) :
-    player
+  return players.map((player) =>
+    player.character.onEachFrame ? player.character.onEachFrame(player, state) : player
   )
 }
 
@@ -34,6 +51,7 @@ const handleCollisions = (players: Player[], state: InGameState): Player[] => {
   let nextPlayers: Player[] = players
   let playerSlotsWithConnectedAttacks: number[] = []
 
+  // prettier-ignore
   nextPlayers = nextPlayers.map((player: Player): Player => {
     let hit: boolean = false
     let hitAttack: ActiveAttack | undefined
@@ -95,7 +113,7 @@ const handleCollisions = (players: Player[], state: InGameState): Player[] => {
   })
 
   // After all collisions have been checked, update players with activated onAttackHit handlers
-  playerSlotsWithConnectedAttacks.forEach(slot => {
+  playerSlotsWithConnectedAttacks.forEach((slot) => {
     if (nextPlayers[slot].character.onAttackHit) {
       nextPlayers[slot] = nextPlayers[slot].character.onAttackHit!(nextPlayers[slot], state) // TODO: Proper type guard
     }
@@ -105,42 +123,54 @@ const handleCollisions = (players: Player[], state: InGameState): Player[] => {
 }
 
 const handlePhysics = (players: Player[]): Player[] => {
-  return players.map((player: Player): Player => {
-    let nextPlayer = { ...player }
+  return players.map(
+    (player: Player): Player => {
+      let nextPlayer = { ...player }
 
-    // position and speeds
-    if (!playerHasHitlag(nextPlayer)) {
-      const minX = player.character.hurtboxRadius
-      const maxX = 1200 - player.character.hurtboxRadius
+      // position and speeds
+      if (!playerHasHitlag(nextPlayer)) {
+        const minX = player.character.hurtboxRadius
+        const maxX = 1200 - player.character.hurtboxRadius
 
-      nextPlayer.x = Math.max(minX, Math.min(maxX, player.x + player.xSpeed))
-      nextPlayer.xSpeed =
-          (player.state === 'hitstun') ?
-              player.xSpeed * 0.975 *
-                  ((nextPlayer.x <= minX || nextPlayer.x >= maxX) ? -1 : 1) // reverse speed on wall hit
-              : Math.abs(player.xSpeed) < 0.3 ? 0 : player.xSpeed * 0.86 // more friction when not in hitstun
+        nextPlayer.x = Math.max(minX, Math.min(maxX, player.x + player.xSpeed))
+        nextPlayer.xSpeed =
+          player.state === 'hitstun'
+            ? player.xSpeed * 0.975 * (nextPlayer.x <= minX || nextPlayer.x >= maxX ? -1 : 1) // reverse speed on wall hit
+            : Math.abs(player.xSpeed) < 0.3
+            ? 0
+            : player.xSpeed * 0.86 // more friction when not in hitstun
 
-      nextPlayer.y = Math.min(600, player.y - player.ySpeed) // Reversed Y axis; helps a lot elsewhere
-      nextPlayer.ySpeed = nextPlayer.y >= 600 ? 0 : Math.max(-18, player.ySpeed - (0.6 * player.character.weight)) // Gravity if in air
-      nextPlayer.jumps = player.y < 600 && nextPlayer.y >= 600 ? player.character.maxJumps : player.jumps // Refresh jumps if landed
+        nextPlayer.y = Math.min(600, player.y - player.ySpeed) // Reversed Y axis; helps a lot elsewhere
+        nextPlayer.ySpeed =
+          nextPlayer.y >= 600 ? 0 : Math.max(-18, player.ySpeed - 0.6 * player.character.weight) // Gravity if in air
+        nextPlayer.jumps =
+          player.y < 600 && nextPlayer.y >= 600 ? player.character.maxJumps : player.jumps // Refresh jumps if landed
 
-      // Landing lag could be: if (player.y < 600 && nextPlayer.y >= 600) nextPlayer.hitlagRemaining += 2
-      // TODO: Add hitlag on floor/groundbounce, remember to remove canSDI flag
+        // Landing lag could be: if (player.y < 600 && nextPlayer.y >= 600) nextPlayer.hitlagRemaining += 2
+        // TODO: Add hitlag on floor/groundbounce, remember to remove canSDI flag
+      }
+
+      return nextPlayer
     }
-
-    return nextPlayer
-  })
+  )
 }
 
 const handleStateUpdates = (players: Player[]): Player[] => {
-  return players.map(player => handlePlayerState(player))
+  return players.map((player) => handlePlayerState(player))
 }
 
-export const handlePlayerMove = (player: Player, direction: -1 | 1, previousState: InGameState): Player => {
+export const handlePlayerMove = (
+  player: Player,
+  direction: -1 | 1,
+  previousState: InGameState
+): Player => {
   let nextPlayer = { ...player }
   if (playerCanMove(player)) {
-    nextPlayer.facing = player.state === 'groundborne' ? (direction === -1 ? 'left' : 'right') : player.facing,
-    nextPlayer.xSpeed = direction * (player.state === 'airborne' ? player.character.airSpeed : player.character.walkSpeed) // TODO: handle state === 'attacking'
+    nextPlayer.facing =
+      player.state === 'groundborne' ? (direction === -1 ? 'left' : 'right') : player.facing
+    nextPlayer.xSpeed =
+      direction *
+      (player.state === 'airborne' ? player.character.airSpeed : player.character.walkSpeed) // TODO: handle state === 'attacking'
 
     if (player.character.onMove) {
       nextPlayer = player.character.onMove(nextPlayer, previousState)
@@ -153,8 +183,7 @@ export const handlePlayerMove = (player: Player, direction: -1 | 1, previousStat
 export const handlePlayerJump = (player: Player, previousState: InGameState): Player => {
   let nextPlayer = { ...player }
   if (player.jumps > 0) {
-    nextPlayer.jumps = player.jumps - 1,
-    nextPlayer.ySpeed = player.character.jumpStrength * 16
+    ;(nextPlayer.jumps = player.jumps - 1), (nextPlayer.ySpeed = player.character.jumpStrength * 16)
 
     if (player.character.onJump) {
       nextPlayer = player.character.onJump(nextPlayer, previousState)
@@ -173,7 +202,9 @@ export const handlePlayerFastFall = (player: Player): Player => {
 export const handlePlayerSDI = (player: Player, input: DirectionalInput): Player => {
   if (playerCanSDI(player)) {
     console.log('handling SDI for input', input)
-    let dx = 0, dy = 0
+    let dx = 0
+    let dy = 0
+    // prettier-ignore
     switch (input) {
       case PlayerInput.Left: dx = -15; break
       case PlayerInput.Right: dx = 15; break
@@ -181,16 +212,21 @@ export const handlePlayerSDI = (player: Player, input: DirectionalInput): Player
       case PlayerInput.Down: dy = 15;  break
     }
     console.log(dx, dy, {
-      x: clamp(player.x + dx,
+      x: clamp(
+        player.x + dx,
         player.character.hurtboxRadius,
-        1200 - player.character.hurtboxRadius),
-      y: Math.min(600, player.y + dy)})
+        1200 - player.character.hurtboxRadius
+      ),
+      y: Math.min(600, player.y + dy),
+    })
     return {
       ...player,
-      x: clamp(player.x + dx,
+      x: clamp(
+        player.x + dx,
         player.character.hurtboxRadius,
-        1200 - player.character.hurtboxRadius),
-      y: Math.min(600, player.y + dy)
+        1200 - player.character.hurtboxRadius
+      ),
+      y: Math.min(600, player.y + dy),
     }
   }
   return player
@@ -198,6 +234,7 @@ export const handlePlayerSDI = (player: Player, input: DirectionalInput): Player
 
 // Attack handling
 
+// prettier-ignore
 const hitboxCollided = (hitbox: Hitbox, attack: ActiveAttack, player: Player, attacker: Player): boolean => {
   let hitboxWorldX = attack.x + hitbox.x
   let hitboxWorldY = attack.y + hitbox.y
@@ -219,40 +256,46 @@ export const updateAttacks = (state: InGameState): InGameState => {
   let newState = {
     ...state,
     activeAttacks: state.activeAttacks
-      .filter(attack => !hasAttackEnded(attack)) // Only pass attacks that have not ended to the next frame
+      .filter((attack) => !hasAttackEnded(attack)) // Only pass attacks that have not ended to the next frame
       .map(
         (attack: ActiveAttack): ActiveAttack => ({
           ...attack,
           x: attack.x + attack.xSpeed,
           y: attack.y + attack.ySpeed,
           currentFrame: attack.currentFrame + 1,
-          hitboxes: attack.hitboxes.map((hitbox: Hitbox): Hitbox => ({
-            ...hitbox,
-            framesUntilActivation: hitbox.framesUntilActivation - 1,
-          })).filter((hitbox: Hitbox) => !hasHitboxEnded(hitbox))
+          hitboxes: attack.hitboxes
+            .map(
+              (hitbox: Hitbox): Hitbox => ({
+                ...hitbox,
+                framesUntilActivation: hitbox.framesUntilActivation - 1,
+              })
+            )
+            .filter((hitbox: Hitbox) => !hasHitboxEnded(hitbox)),
         })
-      )
+      ),
   }
 
   // Handle onStart for all new attacks
   newState.activeAttacks
-      .filter(attack => attack.currentFrame === 1)
-      .forEach(attack => {
-        if (attack.onStart) {
-          newState = attack.onStart(newState, attack)
-        }
-      })
+    .filter((attack) => attack.currentFrame === 1)
+    .forEach((attack) => {
+      if (attack.onStart) {
+        newState = attack.onStart(newState, attack)
+      }
+    })
 
   // Handle onEnd for all removed attacks
   state.activeAttacks
-      .filter(attack => hasAttackEnded(attack))
-      .forEach(attack => {
-        if (attack.onEnd) {
-          newState = attack.onEnd(newState, attack)
-        }
-      })
+    .filter((attack) => hasAttackEnded(attack))
+    .forEach((attack) => {
+      if (attack.onEnd) {
+        newState = attack.onEnd(newState, attack)
+      }
+    })
 
-  newState.activeAttacks.forEach(attack => { newState = handleHitBoxFunctions(newState, attack) })
+  newState.activeAttacks.forEach((attack) => {
+    newState = handleHitBoxFunctions(newState, attack)
+  })
 
   return newState
 }
@@ -273,9 +316,9 @@ const handleHitBoxFunctions = (state: InGameState, attack: ActiveAttack): InGame
 // Hitlag/hitstun and state update. Don't decrease framesUntilNeutral if the player is in hitlag.
 const handlePlayerState = (player: Player): Player => {
   const nextPlayer = { ...player }
-  nextPlayer.framesUntilNeutral = playerHasHitlag(player) ?
-      player.framesUntilNeutral
-      : Math.max(0, player.framesUntilNeutral - 1)
+  nextPlayer.framesUntilNeutral = playerHasHitlag(player)
+    ? player.framesUntilNeutral
+    : Math.max(0, player.framesUntilNeutral - 1)
   nextPlayer.hitlagRemaining = Math.max(0, nextPlayer.hitlagRemaining - 1)
   nextPlayer.state = playerState(nextPlayer)
   if (!playerCanSDI(nextPlayer)) {
