@@ -1,5 +1,5 @@
-import { Character, Player, InGameState } from "../types";
-import { generateAttack, createHitbox, gainMeter, sum } from "../utilities";
+import { Character, Player, InGameState } from '../types'
+import { generateAttack, createHitbox, gainMeter, sum } from '../utilities'
 
 const METER_GAIN_MULTIPLIER = 0.055
 
@@ -17,21 +17,25 @@ export const Katshuma: Character = {
   jumpStrength: 1,
   hurtboxRadius: 20,
   onEachFrame:
-  // Return a meter-gain function that keeps state in a closure
-  (() => {
-    let xDiff = 99999999
-    return (player: Player, previousState: InGameState) => {
+    // Return a meter-gain function that keeps state in a closure
+    (() => {
+      let xDiff = 99999999
+      return (player: Player, previousState: InGameState) => {
+        // Sum of the x-differences between Katshuma and each other player
+        const otherPlayers = previousState.players.filter(
+          (otherPlayer) => otherPlayer.playerSlot !== player.playerSlot
+        )
+        const newXDiff = sum(otherPlayers.map((op) => Math.abs(op.x - player.x)))
 
-      // Sum of the x-differences between Katshuma and each other player
-      const otherPlayers = previousState.players.filter(otherPlayer => otherPlayer.playerSlot !== player.playerSlot)
-      const newXDiff = sum(otherPlayers.map(op => Math.abs(op.x - player.x)))
-
-      // If distance increased, gain meter in relation to the change in the sum of x-differences, divided with the number of players
-      const meterGain = Math.max(0, (newXDiff - xDiff) / otherPlayers.length * METER_GAIN_MULTIPLIER)
-      xDiff = newXDiff
-      return gainMeter(meterGain, player)
-    }
-  })(),
+        // If distance increased, gain meter in relation to the change in the sum of x-differences, divided with the number of players
+        const meterGain = Math.max(
+          0,
+          ((newXDiff - xDiff) / otherPlayers.length) * METER_GAIN_MULTIPLIER
+        )
+        xDiff = newXDiff
+        return gainMeter(meterGain, player)
+      }
+    })(),
   onMove: (player: Player) => player,
   onJump: (player: Player) => player,
   onAttackHit: (player: Player) => player,
@@ -40,9 +44,9 @@ export const Katshuma: Character = {
     LightNeutral: {
       ...generateAttack([
         { ...createHitbox(4, 12, 5), radius: 123 },
-        { ...createHitbox(12, 20, 10), hitLag: 100 }
+        { ...createHitbox(12, 20, 10), hitLag: 100 },
       ]),
-      endWhenHitboxConnects: false
+      endWhenHitboxConnects: false,
     },
     LightForward: {
       ...generateAttack([
@@ -62,11 +66,11 @@ export const Katshuma: Character = {
           y: 5,
           framesUntilActivation: 0,
           duration: 40,
-          onActivation: (state) => { return state },
-          onHit: (state) => { return state },
-          onEnd: (state) => { return state },
-        }
-      ])
+          onActivation: (state) => state,
+          onHit: (state) => state,
+          onEnd: (state) => state,
+        },
+      ]),
     },
     LightDown: {
       ...generateAttack([
@@ -86,11 +90,11 @@ export const Katshuma: Character = {
           y: 30,
           framesUntilActivation: 0,
           duration: 40,
-          onActivation: (state) => { return state },
-          onHit: (state) => { return state },
-          onEnd: (state) => { return state },
-        }
-      ])
+          onActivation: (state) => state,
+          onHit: (state) => state,
+          onEnd: (state) => state,
+        },
+      ]),
     },
     airLightNeutral: {
       ...generateAttack([
@@ -110,11 +114,11 @@ export const Katshuma: Character = {
           y: -5,
           framesUntilActivation: 0,
           duration: 40,
-          onActivation: (state) => { return state },
-          onHit: (state) => { return state },
-          onEnd: (state) => { return state },
-        }
-      ])
+          onActivation: (state) => state,
+          onHit: (state) => state,
+          onEnd: (state) => state,
+        },
+      ]),
     },
     airLightUp: {
       ...generateAttack([
@@ -134,10 +138,10 @@ export const Katshuma: Character = {
           y: -50,
           framesUntilActivation: 0,
           duration: 40,
-          onActivation: (state) => { return state },
-          onHit: (state) => { return state },
-          onEnd: (state) => { return state },
-        }
+          onActivation: (state) => state,
+          onHit: (state) => state,
+          onEnd: (state) => state,
+        },
       ]),
       ...generateAttack([
         {
@@ -156,11 +160,11 @@ export const Katshuma: Character = {
           y: -50,
           framesUntilActivation: 0,
           duration: 40,
-          onActivation: (state) => { return state },
-          onHit: (state) => { return state },
-          onEnd: (state) => { return state },
-        }
-      ])
+          onActivation: (state) => state,
+          onHit: (state) => state,
+          onEnd: (state) => state,
+        },
+      ]),
     },
     airLightDown: {
       ...generateAttack([
@@ -180,11 +184,11 @@ export const Katshuma: Character = {
           y: 50,
           framesUntilActivation: 0,
           duration: 40,
-          onActivation: (state) => { return state },
-          onHit: (state) => { return state },
-          onEnd: (state) => { return state },
-        }
-      ])
+          onActivation: (state) => state,
+          onHit: (state) => state,
+          onEnd: (state) => state,
+        },
+      ]),
     },
     airLightForward: {
       ...generateAttack([
@@ -204,11 +208,11 @@ export const Katshuma: Character = {
           y: -5,
           framesUntilActivation: 0,
           duration: 40,
-          onActivation: (state) => { return state },
-          onHit: (state) => { return state },
-          onEnd: (state) => { return state },
-        }
-      ])
+          onActivation: (state) => state,
+          onHit: (state) => state,
+          onEnd: (state) => state,
+        },
+      ]),
     },
     airLightBack: {
       ...generateAttack([
@@ -228,56 +232,56 @@ export const Katshuma: Character = {
           y: 0,
           framesUntilActivation: 0,
           duration: 40,
-          onActivation: (state) => { return state },
-          onHit: (state) => { return state },
-          onEnd: (state) => { return state },
-        }
-      ])
+          onActivation: (state) => state,
+          onHit: (state) => state,
+          onEnd: (state) => state,
+        },
+      ]),
     },
     SpecialNeutral: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     SpecialDown: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airSpecialNeutral: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airSpecialUp: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airSpecialDown: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airSpecialForward: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airSpecialBack: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     MeterNeutral: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     MeterForward: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     MeterDown: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airMeterNeutral: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airMeterUp: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airMeterDown: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airMeterForward: {
-      ...generateAttack([])
+      ...generateAttack([]),
     },
     airMeterBack: {
-      ...generateAttack([])
-    }
+      ...generateAttack([]),
+    },
   },
 }
