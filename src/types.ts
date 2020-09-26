@@ -138,6 +138,8 @@ type RelativeToPlayer = {
   movesWithPlayer: true,
 }
 
+// Attack related typings
+
 export type Attack = CoordinateSettings & {
   x: number, // Check if the coordinate is relative to player or in world coordinates using utilities.isAttackRelativeToPlayer
   y: number,
@@ -153,8 +155,6 @@ export type Attack = CoordinateSettings & {
   onStart?: (state: InGameState, attack: ActiveAttack) => InGameState,
   onEnd?: (state: InGameState, attack: ActiveAttack) => InGameState,
 }
-
-// Attack related typings
 
 export type Hitbox = {
   hasHit?: boolean,
