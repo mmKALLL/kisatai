@@ -5,10 +5,10 @@ import { Katshuma } from './characters/katshuma'
 import { mmKALLL } from './characters/mmkalll'
 import { True_mmKALLL } from './characters/true-mmkalll'
 
-// Playable characters in KiltaGear, in the order they appear on character selection screen, from left to right
+// Playable characters in kisatai, in the order they appear on character selection screen, from left to right
 export const characters: Character[] = [Katshuma, mmKALLL, True_mmKALLL]
 
-// Stages in KiltaGear (Background pictures)
+// Stages in kisatai (Background pictures)
 // TODO: Add support for stages that are actually of different size game mechanics-wise
 export const stages = {
   kiltis6: {

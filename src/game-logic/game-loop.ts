@@ -1,4 +1,4 @@
-import * as kiltagear from '../kiltagear'
+import * as kisatai from '../kisatai'
 import { render, allowTransitionToIngame } from '../render'
 import {
   InputStatus,
@@ -24,7 +24,7 @@ let currentState: GameState = {
 
 export const startGameLoop = () => {
   const interval = window.setInterval(() => {
-    currentState = nextState(currentState, kiltagear.keys)
+    currentState = nextState(currentState, kisatai.keys)
     render(currentState)
   }, 1000 / FRAMES_PER_SECOND)
 }
@@ -33,9 +33,9 @@ export const startGameLoop = () => {
 const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
   let state = { ...currentState }
 
-  const keysPressed: KeyStatus[] = kiltagear.keysPressed.map((key: string) => kiltagear.keys[key])
-  const keysReleased: KeyStatus[] = kiltagear.keysReleased.map((key: string) => kiltagear.keys[key])
-  kiltagear.clearKeyArrays()
+  const keysPressed: KeyStatus[] = kisatai.keysPressed.map((key: string) => kisatai.keys[key])
+  const keysReleased: KeyStatus[] = kisatai.keysReleased.map((key: string) => kisatai.keys[key])
+  kisatai.clearKeyArrays()
 
   // Global mute/unmute music
   if (keysPressed.find((input) => input.keyName === 'm')) {
@@ -57,15 +57,15 @@ const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
       state = handleCharacterSelection(state, keysPressed)
 
       if (state.start && allowTransitionToIngame()) {
-        kiltagear.initializePlayers(
-          state.characterSelection.map((selection) => kiltagear.characters[selection])
+        kisatai.initializePlayers(
+          state.characterSelection.map((selection) => kisatai.characters[selection])
         )
 
         return {
           screen: 'in-game',
-          stage: kiltagear.stages.kiltis6,
+          stage: kisatai.stages.kiltis6,
           musicPlaying: true,
-          players: kiltagear.players,
+          players: kisatai.players,
           characterSelection: state.characterSelection,
           activeAttacks: [],
         }
@@ -75,13 +75,13 @@ const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
     case 'title-screen':
       // Shortcut for jumping straight in-game with music muted
       if (keysPressed.some((key) => key.keyName === '0')) {
-        kiltagear.initializeInputMaps()
-        kiltagear.initializePlayers([kiltagear.characters[0], kiltagear.characters[1]])
+        kisatai.initializeInputMaps()
+        kisatai.initializePlayers([kisatai.characters[0], kisatai.characters[1]])
         return {
           screen: 'in-game',
-          stage: kiltagear.stages.kiltis6,
+          stage: kisatai.stages.kiltis6,
           musicPlaying: true,
-          players: kiltagear.players,
+          players: kisatai.players,
           characterSelection: [0, 1],
           activeAttacks: [],
         }
@@ -93,7 +93,7 @@ const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
           state.musicPlaying = true
           playMusic()
         }
-        kiltagear.initializeInputMaps()
+        kisatai.initializeInputMaps()
         return {
           screen: 'character-select',
           musicPlaying: true,

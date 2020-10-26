@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { sprites } from './assets'
-import { characters } from './kiltagear'
+import { characters } from './kisatai'
 import { GameState } from './types'
 import { isHitboxActive, isAttackRelativeToPlayer } from './utilities'
 
@@ -182,7 +182,7 @@ export function initialize(): void {
     fontSize: 30,
   })
 
-  const titleText = new PIXI.Text('KiltaGear', titleTextStyle)
+  const titleText = new PIXI.Text('kisatai', titleTextStyle)
   titleText.anchor.set(0.5)
   const versionNumber = new PIXI.Text('v0.6', new PIXI.TextStyle({ fontSize: 22 }))
   versionNumber.x = 195

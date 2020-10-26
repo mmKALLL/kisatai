@@ -1,4 +1,4 @@
-import * as kiltagear from '../kiltagear'
+import * as kisatai from '../kisatai'
 import {
   Player,
   KeyStatus,
@@ -36,7 +36,7 @@ export const handlePlayerInputs = (
   const nextPlayers: Player[] = nextState.players.slice() // shallow copy
 
   nextPlayers.forEach((player) => {
-    const inputMap: { [key: string]: PlayerInput } = kiltagear.inputMaps[player.playerSlot]
+    const inputMap: { [key: string]: PlayerInput } = kisatai.inputMaps[player.playerSlot]
 
     // Check held inputs (i.e. horizontal movement)
     if (
@@ -218,7 +218,7 @@ export const handleCharacterSelection = (
   keysPressed: KeyStatus[]
 ): CharacterSelectionState => {
   const nextState: CharacterSelectionState = currentState
-  const lastCharacterIndex: number = kiltagear.characters.length - 1
+  const lastCharacterIndex: number = kisatai.characters.length - 1
 
   keysPressed.forEach((key: KeyStatus) => {
     switch (key.keyName) {

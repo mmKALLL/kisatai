@@ -52,7 +52,7 @@ export type Stage = {
 export type Options = {
   soundVolume: number // Value between 0..1
   musicVolume: number // Value between 0..1
-  // Key config is stored directly in kiltagear.players
+  // Key config is stored directly in kisatai.players
 }
 
 // Character status related typings
