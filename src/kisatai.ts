@@ -44,7 +44,9 @@ const playerOne: Player = {
     [PlayerInput.Down]: ['s', 'S'],
     [PlayerInput.Right]: ['d', 'D'],
     [PlayerInput.Light]: ['c', 'C'],
-    [PlayerInput.Special]: ['v', 'V'],
+    // [PlayerInput.Special]: ['v', 'V'],
+    [PlayerInput.Special]: ['h'], // FIXME: Demo fix
+    [PlayerInput.Meter]: ['v', 'V'],
     [PlayerInput.Meter]: ['b', 'B'],
   },
 }
@@ -65,8 +67,8 @@ const playerTwo: Player = {
     [PlayerInput.Down]: ['ArrowDown'],
     [PlayerInput.Right]: ['ArrowRight'],
     [PlayerInput.Light]: [','],
-    [PlayerInput.Special]: ['.'],
-    [PlayerInput.Meter]: ['/', '-'],
+    [PlayerInput.Special]: ['l'], // FIXME: Demo fix
+    [PlayerInput.Meter]: ['.', '/', '-'],
   },
 }
 
