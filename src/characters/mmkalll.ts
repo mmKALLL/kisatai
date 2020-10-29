@@ -146,7 +146,7 @@ mmKALLL.attacks = {
   MeterForward: hadoken,
   MeterDown: heal,
   airMeterNeutral: heal,
-  airMeterUp: heal,
+  airMeterUp: hadoken,
   airMeterDown: heal,
   airMeterForward: hadoken,
   airMeterBack: { ...hadoken, xSpeed: -2.5, x: 5 }, // TODO: x: 55 would make sense but makes the projectile spawn too much to the right
