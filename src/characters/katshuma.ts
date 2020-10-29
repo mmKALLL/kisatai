@@ -1,6 +1,32 @@
 import { Character, Player, InGameState } from '../types'
 import { generateAttack, createHitbox, gainMeter, sum } from '../utilities'
 
+const heavyBlow = {
+  ...generateAttack([
+    {
+      damage: 20,
+      radius: 100,
+      knockbackBase: 13,
+      knockbackGrowth: 1.3,
+      knockbackX: 1,
+      knockbackY: 1,
+      hitstunBase: 50,
+      hitstunGrowth: 1,
+      hitLag: 12,
+      ignoreOwnerHitlag: false,
+      // characterSpecific: ,
+      x: 35,
+      y: -5,
+      framesUntilActivation: 0,
+      duration: 40,
+      onActivation: (state) => state,
+      onHit: (state) => state,
+      onEnd: (state) => state,
+    },
+  ]),
+  meterCost: 25,
+}
+
 const METER_GAIN_MULTIPLIER = 0.055
 
 export const Katshuma: Character = {
@@ -43,8 +69,8 @@ export const Katshuma: Character = {
   attacks: {
     LightNeutral: {
       ...generateAttack([
-        { ...createHitbox(4, 12, 5), radius: 123 },
-        { ...createHitbox(12, 20, 10), hitLag: 100 },
+        { ...createHitbox(4, 12, 5), radius: 30 },
+        { ...createHitbox(12, 20, 10), hitLag: 20 },
       ]),
       endWhenHitboxConnects: false,
     },
@@ -54,7 +80,7 @@ export const Katshuma: Character = {
           damage: 4,
           radius: 20,
           knockbackBase: 6,
-          knockbackGrowth: 2,
+          knockbackGrowth: 1.2,
           knockbackX: 0.5,
           knockbackY: 1,
           hitstunBase: 20,
@@ -78,7 +104,7 @@ export const Katshuma: Character = {
           damage: 6,
           radius: 20,
           knockbackBase: 15,
-          knockbackGrowth: 5,
+          knockbackGrowth: 1.5,
           knockbackX: 1,
           knockbackY: -1,
           hitstunBase: 30,
@@ -102,7 +128,7 @@ export const Katshuma: Character = {
           damage: 9,
           radius: 20,
           knockbackBase: 1,
-          knockbackGrowth: 1,
+          knockbackGrowth: 1.1,
           knockbackX: 1,
           knockbackY: 1,
           hitstunBase: 20,
@@ -124,42 +150,20 @@ export const Katshuma: Character = {
       ...generateAttack([
         {
           damage: 4,
-          radius: 20,
+          radius: 40,
           knockbackBase: 12,
-          knockbackGrowth: 2,
-          knockbackX: 0,
-          knockbackY: 1,
-          hitstunBase: 10,
-          hitstunGrowth: 1,
+          knockbackGrowth: 1.2,
+          knockbackX: 0.1,
+          knockbackY: 1.2,
+          hitstunBase: 15,
+          hitstunGrowth: 1.1,
           hitLag: 12,
           ignoreOwnerHitlag: false,
           // characterSpecific: ,
           x: 10,
           y: -50,
           framesUntilActivation: 0,
-          duration: 40,
-          onActivation: (state) => state,
-          onHit: (state) => state,
-          onEnd: (state) => state,
-        },
-      ]),
-      ...generateAttack([
-        {
-          damage: 4,
-          radius: 20,
-          knockbackBase: 18,
-          knockbackGrowth: 2,
-          knockbackX: 0,
-          knockbackY: 1,
-          hitstunBase: 10,
-          hitstunGrowth: 1,
-          hitLag: 12,
-          ignoreOwnerHitlag: false,
-          // characterSpecific: ,
-          x: -10,
-          y: -50,
-          framesUntilActivation: 0,
-          duration: 40,
+          duration: 30,
           onActivation: (state) => state,
           onHit: (state) => state,
           onEnd: (state) => state,
@@ -172,7 +176,7 @@ export const Katshuma: Character = {
           damage: 10,
           radius: 30,
           knockbackBase: 30,
-          knockbackGrowth: 3,
+          knockbackGrowth: 1.3,
           knockbackX: 0,
           knockbackY: -1,
           hitstunBase: 10,
@@ -196,7 +200,7 @@ export const Katshuma: Character = {
           damage: 5,
           radius: 10,
           knockbackBase: 10,
-          knockbackGrowth: 2,
+          knockbackGrowth: 1.2,
           knockbackX: 1,
           knockbackY: 0.2,
           hitstunBase: 10,
@@ -220,7 +224,7 @@ export const Katshuma: Character = {
           damage: 8,
           radius: 20,
           knockbackBase: 30,
-          knockbackGrowth: 5,
+          knockbackGrowth: 1.5,
           knockbackX: 1,
           knockbackY: 0.4,
           hitstunBase: 25,
@@ -259,29 +263,13 @@ export const Katshuma: Character = {
     airSpecialBack: {
       ...generateAttack([]),
     },
-    MeterNeutral: {
-      ...generateAttack([]),
-    },
-    MeterForward: {
-      ...generateAttack([]),
-    },
-    MeterDown: {
-      ...generateAttack([]),
-    },
-    airMeterNeutral: {
-      ...generateAttack([]),
-    },
-    airMeterUp: {
-      ...generateAttack([]),
-    },
-    airMeterDown: {
-      ...generateAttack([]),
-    },
-    airMeterForward: {
-      ...generateAttack([]),
-    },
-    airMeterBack: {
-      ...generateAttack([]),
-    },
+    MeterNeutral: heavyBlow,
+    MeterForward: heavyBlow,
+    MeterDown: heavyBlow,
+    airMeterNeutral: heavyBlow,
+    airMeterUp: heavyBlow,
+    airMeterDown: heavyBlow,
+    airMeterForward: heavyBlow,
+    airMeterBack: heavyBlow,
   },
 }
