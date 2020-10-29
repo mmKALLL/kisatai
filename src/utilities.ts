@@ -25,6 +25,9 @@ export function assertNever(x: never): never {
   throw new Error(`Unexpected object in assertNever:\n  ${x}`)
 }
 
+// Produce user-facing string from player slot value. 1-based indexing so add one.
+export const formatPlayerSlot = (slot: number): string => `P${slot + 1}`
+
 // Music and other assets
 
 const damageslashUrl = require('./assets/audio/damageslash.wav')

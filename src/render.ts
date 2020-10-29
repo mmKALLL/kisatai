@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import { sprites } from './assets'
 import { characters } from './kisatai'
 import { GameState } from './types'
-import { isHitboxActive, isAttackRelativeToPlayer } from './utilities'
+import { isHitboxActive, isAttackRelativeToPlayer, formatPlayerSlot } from './utilities'
 
 var type = 'WebGL'
 if (!PIXI.utils.isWebGLSupported()) {
@@ -432,9 +432,9 @@ export function initialize(): void {
   readyToStart.x = middleX
   readyToStart.y = middleY + 230
 
-  const instructionsLeft = new PIXI.Text('Move: WASD\nAttack: C', readyToStartTextStyle)
+  const instructionsLeft = new PIXI.Text('移動: WASD\n攻撃: C\n必殺技: V', readyToStartTextStyle)
   const instructionsRight = new PIXI.Text(
-    'Move: Arrow keys\nAttack: Comma (,)',
+    '移動: ←↑→↓\n攻撃: カンマ　(,)\n必殺技: ドット (.)',
     readyToStartTextStyle
   )
   characterSelection1.addChild(instructionsLeft)
@@ -1241,7 +1241,9 @@ export function render(state: GameState): void {
     if (previousScreen != 'game-over') {
       previousScreen = 'game-over'
       if (state.winner != undefined) {
-        winnerText.text = 'Winner: ' + state.winner.character.name
+        winnerText.text = `Winner: ${state.winner.character.name} (${formatPlayerSlot(
+          state.winner.playerSlot
+        )})`
       } else {
         winnerText.text = 'Game over!'
       }
