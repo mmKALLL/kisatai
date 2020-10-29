@@ -77,6 +77,7 @@ const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
       if (keysPressed.some((key) => key.keyName === '0')) {
         kisatai.initializeInputMaps()
         kisatai.initializePlayers([kisatai.characters[0], kisatai.characters[1]])
+        kisatai.players.forEach((player) => (player.meter = 50))
         return {
           screen: 'in-game',
           stage: kisatai.stages.kiltis6,
@@ -135,14 +136,14 @@ const gameOverState = (players: Player[]): GameOverState => {
       screen: 'game-over',
       musicPlaying: true,
       winner: winner,
-      framesUntilTitle: 180,
+      framesUntilTitle: 210,
     }
   } else {
     return {
       screen: 'game-over',
       musicPlaying: true,
       winner: undefined,
-      framesUntilTitle: 140,
+      framesUntilTitle: 210,
     }
   }
 }
