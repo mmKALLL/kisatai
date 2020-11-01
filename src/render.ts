@@ -399,8 +399,8 @@ export function initialize(): void {
   })
 
   characterNames.push(new PIXI.Text('', characterNameStyle1))
-  characterNames.push(new PIXI.Text('Katshuma', characterNameStyle2))
-  characterNames.push(new PIXI.Text('mmKALLL', characterNameStyle3))
+  characterNames.push(new PIXI.Text('ボクサー', characterNameStyle2))
+  characterNames.push(new PIXI.Text('格闘師匠', characterNameStyle3))
   characterNames.push(new PIXI.Text('', characterNameStyle4))
   //characterName1.anchor.set(0.5)
   //characterName2.anchor.set(0.5)

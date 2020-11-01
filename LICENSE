@@ -9,10 +9,13 @@
  * Copyright (c) 2020 Esa "mmKALLL" Koskinen
  * ********************************************************/
 
-Game, design, code, non-font assets, images, text, and everything else related:
+Game, design, code, non-font assets, images, text, and everything else (except the below assets):
   Copyright (c) Esa "mmKALLL" Koskinen, 2020. All rights reserved.
   Not for redistribution of any kind. Source code provided for reference purposes only.
 
 Rendering engine partially based on source code provided by Jussi "Katshuma" Hirvonen.
+"Ready!" text by Jussi "Katshuma" Hirvonen, licensed under CC 3.0-BY-SA.
+
+Some character photo assets are from Unsplash under the Unsplash License.
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.

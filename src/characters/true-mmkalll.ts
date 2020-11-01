@@ -2,7 +2,7 @@ import { Character } from '../types'
 import { generateAttack, createHitbox, generateProjectile } from '../utilities'
 
 export const True_mmKALLL: Character = {
-  name: '真・mmKALLL',
+  name: 'ウルフマン',
   id: 'true-mmkalll',
   maxHealth: 100,
   maxMeter: 100,

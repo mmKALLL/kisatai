@@ -30,7 +30,7 @@ const heavyBlow = {
 const METER_GAIN_MULTIPLIER = 0.055
 
 export const Katshuma: Character = {
-  name: 'Katshuma',
+  name: 'ボクサー',
   id: 'katshuma',
   maxHealth: 100,
   maxMeter: 100,
@@ -78,7 +78,7 @@ export const Katshuma: Character = {
       ...generateAttack([
         {
           damage: 4,
-          radius: 20,
+          radius: 25,
           knockbackBase: 6,
           knockbackGrowth: 1.2,
           knockbackX: 0.5,
@@ -149,9 +149,9 @@ export const Katshuma: Character = {
     airLightUp: {
       ...generateAttack([
         {
-          damage: 4,
-          radius: 40,
-          knockbackBase: 12,
+          damage: 6,
+          radius: 45,
+          knockbackBase: 13,
           knockbackGrowth: 1.2,
           knockbackX: 0.1,
           knockbackY: 1.2,
@@ -161,9 +161,9 @@ export const Katshuma: Character = {
           ignoreOwnerHitlag: false,
           // characterSpecific: ,
           x: 10,
-          y: -50,
+          y: -20,
           framesUntilActivation: 0,
-          duration: 30,
+          duration: 120,
           onActivation: (state) => state,
           onHit: (state) => state,
           onEnd: (state) => state,
@@ -198,8 +198,8 @@ export const Katshuma: Character = {
       ...generateAttack([
         {
           damage: 5,
-          radius: 10,
-          knockbackBase: 10,
+          radius: 35,
+          knockbackBase: 18,
           knockbackGrowth: 1.2,
           knockbackX: 1,
           knockbackY: 0.2,
@@ -211,7 +211,7 @@ export const Katshuma: Character = {
           x: 15,
           y: -5,
           framesUntilActivation: 0,
-          duration: 40,
+          duration: 60,
           onActivation: (state) => state,
           onHit: (state) => state,
           onEnd: (state) => state,
@@ -223,10 +223,10 @@ export const Katshuma: Character = {
         {
           damage: 8,
           radius: 20,
-          knockbackBase: 30,
-          knockbackGrowth: 1.5,
+          knockbackBase: 28,
+          knockbackGrowth: 1.1,
           knockbackX: 1,
-          knockbackY: 0.4,
+          knockbackY: 0.8,
           hitstunBase: 25,
           hitstunGrowth: 1,
           hitLag: 12,
@@ -235,7 +235,7 @@ export const Katshuma: Character = {
           x: 30,
           y: 0,
           framesUntilActivation: 0,
-          duration: 40,
+          duration: 50,
           onActivation: (state) => state,
           onHit: (state) => state,
           onEnd: (state) => state,

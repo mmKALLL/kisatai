@@ -2,7 +2,7 @@ import { Character, Attack, Player } from '../types'
 import { generateAttack, createHitbox, gainMeter, generateProjectile } from '../utilities'
 
 export const mmKALLL: Character = {
-  name: 'mmKALLL',
+  name: '格闘師匠',
   id: 'mmkalll',
   maxHealth: 100,
   maxMeter: 100,
@@ -25,7 +25,7 @@ export const mmKALLL: Character = {
       duration: 22, // You can override any property of generateAttack by adding it after the ... spread
     },
     LightForward: {
-      ...generateAttack([{ ...createHitbox(20, 10, 13) }]),
+      ...generateAttack([{ ...createHitbox(10, 25, 13) }]),
       duration: 35,
     },
     LightDown: {
@@ -49,7 +49,7 @@ export const mmKALLL: Character = {
       ...generateAttack([{ ...createHitbox(30, 20, 22) }]),
     },
     airLightForward: {
-      ...generateAttack([{ ...createHitbox(4, 40, 5), radius: 30 }]),
+      ...generateAttack([{ ...createHitbox(4, 60, 5), radius: 30 }]),
     },
     // An attack can also have many hitboxes with different timings
     airLightBack: {
@@ -101,9 +101,9 @@ export const heal: Attack = {
 }
 
 export const hadoken: Attack = {
-  ...generateProjectile([{ ...createHitbox(30, 180, 8) }]),
+  ...generateProjectile([{ ...createHitbox(25, 200, 8) }]),
   onStart: (state, attack) => {
-    state.players[attack.playerSlot].hitlagRemaining = 30
+    state.players[attack.playerSlot].hitlagRemaining = 25
     return state
   },
   x: -55,
@@ -142,12 +142,13 @@ mmKALLL.attacks = {
   },
 
   // Meter moves
-  MeterNeutral: heal,
+  // TODO: Add heal once it has animations
+  MeterNeutral: hadoken,
   MeterForward: hadoken,
-  MeterDown: heal,
-  airMeterNeutral: heal,
+  MeterDown: hadoken,
+  airMeterNeutral: hadoken,
   airMeterUp: hadoken,
-  airMeterDown: heal,
+  airMeterDown: hadoken,
   airMeterForward: hadoken,
   airMeterBack: { ...hadoken, xSpeed: -2.5, x: 5 }, // TODO: x: 55 would make sense but makes the projectile spawn too much to the right
 }

@@ -148,14 +148,14 @@ export const createHitbox = (
 ): Hitbox => {
   return {
     damage: strength * 0.75,
-    radius: 10 + strength * 4,
-    knockbackBase: 13 + 0.7 * strength,
-    knockbackGrowth: 1.25, // increase knockback when opponent on low health
+    radius: 15 + strength * 5,
+    knockbackBase: 18 + 0.9 * strength,
+    knockbackGrowth: 1.3, // increase knockback when opponent on low health
     knockbackX: 1,
-    knockbackY: 0.6,
-    hitstunBase: 25, // frames
+    knockbackY: 0.8,
+    hitstunBase: 24, // frames
     hitstunGrowth: 1.1, // increase hitstun when opponent on low health
-    hitLag: 6, // frames
+    hitLag: 8, // frames
     ignoreOwnerHitlag: false,
     //characterSpecific: 0,
     x: 30,
