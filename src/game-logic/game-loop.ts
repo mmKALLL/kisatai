@@ -1,9 +1,17 @@
-import * as kiltagear from '../kiltagear'
+import * as kisatai from '../kisatai'
 import { render, allowTransitionToIngame } from '../render'
-import { InputStatus, KeyStatus, GameState, InGameState, Hitbox, Player, GameOverState } from '../types';
-import { handleCharacterSelection, handlePlayerInputs } from './input-handler';
-import { updateAttacks, nextPhysicsState } from './physics';
-import { playMusic, toggleMusicMuted, assertNever } from '../utilities';
+import {
+  InputStatus,
+  KeyStatus,
+  GameState,
+  InGameState,
+  Hitbox,
+  Player,
+  GameOverState,
+} from '../types'
+import { handleCharacterSelection, handlePlayerInputs } from './input-handler'
+import { updateAttacks, nextPhysicsState } from './physics'
+import { playMusic, toggleMusicMuted, assertNever } from '../utilities'
 
 // As a developer, I want this file to be indented with 2 spaces. -- Esa
 
@@ -11,12 +19,12 @@ const FRAMES_PER_SECOND = 60
 
 let currentState: GameState = {
   screen: 'title-screen',
-  musicPlaying: false
+  musicPlaying: false,
 }
 
 export const startGameLoop = () => {
   const interval = window.setInterval(() => {
-    currentState = nextState(currentState, kiltagear.keys)
+    currentState = nextState(currentState, kisatai.keys)
     render(currentState)
   }, 1000 / FRAMES_PER_SECOND)
 }
@@ -25,12 +33,12 @@ export const startGameLoop = () => {
 const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
   let state = { ...currentState }
 
-  const keysPressed: KeyStatus[] = kiltagear.keysPressed.map((key: string) => kiltagear.keys[key])
-  const keysReleased: KeyStatus[] = kiltagear.keysReleased.map((key: string) => kiltagear.keys[key])
-  kiltagear.clearKeyArrays()
+  const keysPressed: KeyStatus[] = kisatai.keysPressed.map((key: string) => kisatai.keys[key])
+  const keysReleased: KeyStatus[] = kisatai.keysReleased.map((key: string) => kisatai.keys[key])
+  kisatai.clearKeyArrays()
 
   // Global mute/unmute music
-  if (keysPressed.find(input => input.keyName === 'm')) {
+  if (keysPressed.find((input) => input.keyName === 'm')) {
     toggleMusicMuted()
   }
 
@@ -49,33 +57,34 @@ const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
       state = handleCharacterSelection(state, keysPressed)
 
       if (state.start && allowTransitionToIngame()) {
-        kiltagear.initializePlayers(
-          state.characterSelection.map(selection => kiltagear.characters[selection])
+        kisatai.initializePlayers(
+          state.characterSelection.map((selection) => kisatai.characters[selection])
         )
 
         return {
           screen: 'in-game',
-          stage: kiltagear.stages.kiltis6,
+          stage: kisatai.stages.kiltis6,
           musicPlaying: true,
-          players: kiltagear.players,
+          players: kisatai.players,
           characterSelection: state.characterSelection,
-          activeAttacks: []
+          activeAttacks: [],
         }
       }
 
       return state
     case 'title-screen':
       // Shortcut for jumping straight in-game with music muted
-      if (keysPressed.some(key => key.keyName === '0')) {
-        kiltagear.initializeInputMaps()
-        kiltagear.initializePlayers([kiltagear.characters[0], kiltagear.characters[1]])
+      if (keysPressed.some((key) => key.keyName === '0')) {
+        kisatai.initializeInputMaps()
+        kisatai.initializePlayers([kisatai.characters[0], kisatai.characters[1]])
+        kisatai.players.forEach((player) => (player.meter = 50))
         return {
           screen: 'in-game',
-          stage: kiltagear.stages.kiltis6,
+          stage: kisatai.stages.kiltis6,
           musicPlaying: true,
-          players: kiltagear.players,
+          players: kisatai.players,
           characterSelection: [0, 1],
-          activeAttacks: []
+          activeAttacks: [],
         }
       }
 
@@ -85,13 +94,13 @@ const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
           state.musicPlaying = true
           playMusic()
         }
-        kiltagear.initializeInputMaps()
+        kisatai.initializeInputMaps()
         return {
           screen: 'character-select',
           musicPlaying: true,
           characterSelection: [0, 1], // Initial cursor positions of player 1 and 2, needs to be expanded to support more players
           playerReady: [false, false],
-          start: false
+          start: false,
         }
       }
 
@@ -100,13 +109,13 @@ const nextState = (currentState: GameState, inputs: InputStatus): GameState => {
       if (state.framesUntilTitle <= 0) {
         return {
           screen: 'title-screen',
-          musicPlaying: true
+          musicPlaying: true,
         }
       }
 
       return {
         ...state,
-        framesUntilTitle: state.framesUntilTitle - 1
+        framesUntilTitle: state.framesUntilTitle - 1,
       }
     default:
       assertNever(state)
@@ -121,20 +130,20 @@ const isGameOver = (state: InGameState): boolean => {
 
 // TODO: Add a results screen
 const gameOverState = (players: Player[]): GameOverState => {
-  const winner: Player | undefined = players.find(player => player.health > 0)
+  const winner: Player | undefined = players.find((player) => player.health > 0)
   if (winner) {
     return {
       screen: 'game-over',
       musicPlaying: true,
       winner: winner,
-      framesUntilTitle: 180
+      framesUntilTitle: 210,
     }
   } else {
     return {
       screen: 'game-over',
       musicPlaying: true,
       winner: undefined,
-      framesUntilTitle: 140
+      framesUntilTitle: 210,
     }
   }
 }

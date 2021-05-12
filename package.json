@@ -1,10 +1,10 @@
 {
-    "name": "kiltagear",
+    "name": "kisatai",
     "version": "1.0.0",
-    "description": "A 2D fighting game presented by NiemiSmäsh.",
+    "description": "立ち回りを考えさせる高速空中戦いの格闘ゲーム",
     "private": true,
     "browser": true,
-    "main": "kiltagear.js",
+    "main": "kisatai.js",
     "engines": {
         "node": ">=10.15.0"
     },
@@ -15,14 +15,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/VsKatshuma/KiltaGear.git"
+        "url": "git+https://github.com/mmKALLL/kisatai.git"
     },
-    "author": "NiemiSmäsh",
+    "author": "Esa Koskinen",
     "license": "Refer to LICENSE file",
     "bugs": {
-        "url": "https://github.com/VsKatshuma/KiltaGear/issues"
+        "url": "https://github.com/mmKALLL/kisatai/issues"
     },
-    "homepage": "https://github.com/VsKatshuma/KiltaGear#readme",
+    "homepage": "https://github.com/mmKALLL/kisatai#readme",
     "dependencies": {
         "pixi.js": "^5.1.3"
     },
