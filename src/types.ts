@@ -197,11 +197,13 @@ export type Player = PlayerBase & {
   character: Character
   x: number
   y: number
-  facing: 'left' | 'right'
+  facing: Facing
   health: number
   meter: number
   jumps: number
 }
+
+export type Facing = 'left' | 'right'
 
 export enum PlayerInput {
   Left = 'Left',

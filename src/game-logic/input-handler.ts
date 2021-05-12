@@ -11,6 +11,7 @@ import {
   CharacterState,
   Attack,
   PlayerInput,
+  Facing,
 } from '../types'
 import { getAttackString, playerCanAct, playerCanSDI, isDirectionalInput } from '../utilities'
 import {
@@ -154,7 +155,7 @@ function getAttackDirection(player: Player, inputs: InputStatus): AttackDirectio
 
 function inputToAttackDirection(
   input: PlayerInput,
-  facing: 'left' | 'right',
+  facing: Facing,
   state: CharacterState
 ): AttackDirection {
   switch (input) {
@@ -175,6 +176,8 @@ function inputToAttackDirection(
       return 'Neutral'
   }
 }
+
+export function attackToInputs(attack: Attack) {}
 
 function addActiveAttack(
   attack: Attack,
