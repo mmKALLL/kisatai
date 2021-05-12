@@ -1,7 +1,5 @@
-# KiltaGear
-KiltaGear is a 2D fighting game presented by NiemiSmäsh.
-
-Play now at https://mmkalll.itch.io/kiltagear!
+# Kisatai
+Kisatai is a 2D fighting game forked from KiltaGear (https://mmkalll.itch.io/kiltagear)
 
 ![真・mmKALLL](src/assets/sprites/original-true-mmkalll.jpg?raw=true "True mmKALLL")
 
