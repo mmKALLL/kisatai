@@ -17,7 +17,7 @@ export const clamp = (number: number, min: number, max: number): number => {
 }
 
 export const sum = (array: number[]): number => {
-  return array.reduce((a, b) => a + b)
+  return array.reduce((a, b) => a + b, 0)
 }
 
 // Explicitly check that all inferred types are used - see e.g. game-loop.ts

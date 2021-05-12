@@ -89,38 +89,42 @@ export type Character = {
   onJump?: (player: Player, previousState: InGameState) => Player
   onAttackHit?: (player: Player, previousState: InGameState) => Player // Called when own attack hits an opponent
   onGetHit?: (player: Player, previousState: InGameState) => Player // Called when hit by an opponent's attack
-  attacks: Partial<{
-    LightNeutral: Attack
-    LightForward: Attack
-    LightDown: Attack
-
-    airLightNeutral: Attack
-    airLightUp: Attack
-    airLightDown: Attack
-    airLightForward: Attack
-    airLightBack: Attack
-
-    SpecialNeutral: Attack
-    SpecialForward: Attack
-    SpecialDown: Attack
-
-    airSpecialNeutral: Attack
-    airSpecialUp: Attack
-    airSpecialDown: Attack
-    airSpecialForward: Attack
-    airSpecialBack: Attack
-
-    MeterNeutral: Attack
-    MeterForward: Attack
-    MeterDown: Attack
-
-    airMeterNeutral: Attack
-    airMeterUp: Attack
-    airMeterDown: Attack
-    airMeterForward: Attack
-    airMeterBack: Attack
-  }>
+  attacks: CharacterAttacks
 }
+
+export type CharacterAttacks = Partial<{
+  LightNeutral: Attack
+  LightForward: Attack
+  LightDown: Attack
+
+  airLightNeutral: Attack
+  airLightUp: Attack
+  airLightDown: Attack
+  airLightForward: Attack
+  airLightBack: Attack
+
+  SpecialNeutral: Attack
+  SpecialForward: Attack
+  SpecialDown: Attack
+
+  airSpecialNeutral: Attack
+  airSpecialUp: Attack
+  airSpecialDown: Attack
+  airSpecialForward: Attack
+  airSpecialBack: Attack
+
+  MeterNeutral: Attack
+  MeterForward: Attack
+  MeterDown: Attack
+
+  airMeterNeutral: Attack
+  airMeterUp: Attack
+  airMeterDown: Attack
+  airMeterForward: Attack
+  airMeterBack: Attack
+}>
+
+export type AttackName = keyof CharacterAttacks
 
 type CoordinateSettings = StaticCoordinates | WorldCoordinates | RelativeToPlayer
 
@@ -192,6 +196,7 @@ export type PlayerBase = {
 }
 
 export type Player = PlayerBase & {
+  controller: 'human' | AISystem
   playerSlot: number
   playerInputs: { [input in Exclude<PlayerInput, PlayerInput.Neutral>]: string[] } // For each pressable PlayerInput, provide an array of keyNames
   character: Character
@@ -221,3 +226,10 @@ export type DirectionalInput =
   | PlayerInput.Right
   | PlayerInput.Up
   | PlayerInput.Down
+
+export type AISystem = {
+  name: string
+  description: string
+  strength: number // 0 - 9, empirical value for cpu strength
+  provideInputs: (gs: InGameState, playerSlot: number) => PlayerInput[]
+}
