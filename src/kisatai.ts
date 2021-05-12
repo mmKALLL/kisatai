@@ -30,6 +30,7 @@ const playerBase: PlayerBase = {
 
 const playerOne: Player = {
   ...playerBase,
+  controller: 'human',
   playerSlot: 0,
   character: Katshuma,
   health: Katshuma.maxHealth,
@@ -53,6 +54,7 @@ const playerOne: Player = {
 
 const playerTwo: Player = {
   ...playerBase,
+  controller: 'human',
   playerSlot: 1,
   character: mmKALLL,
   health: mmKALLL.maxHealth,
